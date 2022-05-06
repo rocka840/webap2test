@@ -1,33 +1,38 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset='utf-8'>
-    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
-    <title>WEBAP2test - Katherine</title>
-    <meta name='viewport' content='width=device-width, initial-scale=1'>
-</head>
-<body>
-    
-   <?php
+    <?php
     include_once("dbConnect.php");
     header('Content-Type: application/json; charset=utf-8');
-   ?>
+    ?>
 
    <?php
-    $sql = $conn->prepare("SELECT FROM Countries co JOIN Cities ci ON co.CountryName = ci.CityName = ci.Inhabitants WHERE co.CountryID = ?");
-    $countrySelected = $_GET["CountryID"];
+    $conn=json_encode($_GET);
+
+    $sql = $conn->prepare("SELECT FROM Countries co JOIN Cities ci WHERE co.CountryName = ci.CityName AND ci.Inhabitants WHERE co.CountryID = ?");
+    $countrySelected = $_POST["Countries"];
     $sql->bind_param("i", "$countrySelected");
     $sql->execute();
     $result = $sql->get_result();
     
     echo json_encode($result);
    ?>
-    
+
    <?php
-    if($_GET["Country"]){
-        $sql = $conn->prepare("SELECT")
+    if(isset($_GET["Country"])){
+        $sqlSelect = $conn->prepare("SELECT Countries FROM countries WHERE CountryName=?");
+        $sqlSelect->bind_param("s", $_GET["Country"]);
+        $sqlSelect->execute();
+        $res = $sqlSelect->get_result();
     }
    ?>
 
-</body>
-</html>
+   <?php
+    if(isset($_GET["minInhabitants"])) {
+        $sqlSelect2 = $conn->prepare("SELECT Cities FROM countries WHERE CityName=?");
+        $sqlSelect2->bind_param("s", $_GET["minhabitants"]);
+        $sqlSelect2->execute();
+        $res = $sqlSelect2->get_result();
+        if($res->num_rows>0){
+            $row = $res->fetch_assoc();
+            echo json_encode($row);
+        }
+    }
+   ?>
